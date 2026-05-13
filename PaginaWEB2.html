@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Galería de Imágenes</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0f0f0f;
+      color: #f0f0f0;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      padding: 60px 20px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(99,102,241,.3) 0%, transparent 70%);
+    }
+    header h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      background: linear-gradient(90deg, #818cf8, #c084fc, #f472b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative;
+    }
+    header p { margin-top: 12px; color: #94a3b8; font-size: 1.1rem; position: relative; }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 20px;
+      background: #111;
+      border-bottom: 1px solid #1e1e2e;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    nav button {
+      background: transparent;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      padding: 8px 20px;
+      border-radius: 99px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    nav button:hover, nav button.active {
+      background: #6366f1;
+      border-color: #6366f1;
+      color: #fff;
+    }
+
+    .hero { position: relative; height: 420px; overflow: hidden; }
+    .hero img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.6); }
+    .hero-text {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 20px;
+    }
+    .hero-text h2 { font-size: 2.5rem; font-weight: 700; text-shadow: 0 2px 12px rgba(0,0,0,.8); }
+    .hero-text p { margin-top: 10px; font-size: 1.1rem; color: #e2e8f0; text-shadow: 0 2px 8px rgba(0,0,0,.8); }
+    .hero-badge {
+      margin-top: 20px;
+      background: rgba(99,102,241,.85);
+      color: #fff; padding: 8px 24px;
+      border-radius: 99px; font-size: .95rem; font-weight: 600;
+      backdrop-filter: blur(8px);
+    }
+
+    .section { padding: 60px 24px; max-width: 1200px; margin: 0 auto; }
+    .section-title { font-size: 1.8rem; font-weight: 700; margin-bottom: 8px; }
+    .section-title span { color: #818cf8; }
+    .section-subtitle { color: #64748b; margin-bottom: 32px; font-size: .95rem; }
+
+    .card {
+      position: relative; border-radius: 16px; overflow: hidden;
+      background: #1e1e2e; cursor: pointer;
+      transition: transform .3s, box-shadow .3s, opacity .3s;
+      box-shadow: 0 4px 20px rgba(0,0,0,.4);
+    }
+    .card:hover { transform: translateY(-6px); box-shadow: 0 12px 40px rgba(99,102,241,.3); }
+    .card img { width: 100%; height: 220px; object-fit: cover; display: block; transition: transform .4s; }
+    .card:hover img { transform: scale(1.06); }
+    .card-info { padding: 16px; }
+    .card-info h3 { font-size: 1rem; font-weight: 600; color: #e2e8f0; }
+    .card-info p { font-size: .82rem; color: #64748b; margin-top: 4px; }
+    .card-tag {
+      display: inline-block; margin-top: 10px;
+      padding: 3px 10px; border-radius: 99px;
+      font-size: .75rem; font-weight: 600;
+    }
+    .tag-nature   { background: #064e3b; color: #6ee7b7; }
+    .tag-city     { background: #1e3a5f; color: #93c5fd; }
+    .tag-abstract { background: #3b0764; color: #e879f9; }
+    .tag-people   { background: #431407; color: #fb923c; }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .featured-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 16px;
+    }
+    .featured-grid .card:first-child { grid-row: span 2; }
+    .featured-grid .card:first-child img { height: 100%; min-height: 460px; }
+    .featured-grid .card img { height: 220px; }
+    .featured-grid.layout-reset { grid-template-columns: 1fr 1fr; grid-template-rows: auto; }
+    .featured-grid.layout-reset .card:first-child { grid-row: span 1; }
+    .featured-grid.layout-reset .card:first-child img { min-height: 220px; height: 220px; }
+    .featured-grid.layout-single { grid-template-columns: 1fr; }
+
+    .panorama-list { display: flex; flex-direction: column; gap: 16px; }
+    .panorama-card {
+      position: relative; border-radius: 16px; overflow: hidden;
+      height: 200px; cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0,0,0,.4);
+      transition: box-shadow .3s, opacity .3s;
+    }
+    .panorama-card:hover { box-shadow: 0 8px 32px rgba(99,102,241,.4); }
+    .panorama-card img {
+      width: 100%; height: 100%; object-fit: cover;
+      filter: brightness(.65); transition: transform .5s;
+    }
+    .panorama-card:hover img { transform: scale(1.04); }
+    .panorama-label { position: absolute; bottom: 20px; left: 24px; }
+    .panorama-label h3 { font-size: 1.4rem; font-weight: 700; text-shadow: 0 2px 8px rgba(0,0,0,.8); }
+    .panorama-label p { font-size: .85rem; color: #cbd5e1; }
+
+    .lightbox {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.92); z-index: 999;
+      align-items: center; justify-content: center;
+      flex-direction: column; padding: 20px;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img {
+      max-width: 90vw; max-height: 80vh;
+      border-radius: 12px; object-fit: contain;
+      box-shadow: 0 0 60px rgba(99,102,241,.4);
+    }
+    .lightbox-title { margin-top: 16px; font-size: 1.1rem; color: #e2e8f0; font-weight: 600; }
+    .lightbox-close {
+      position: absolute; top: 20px; right: 24px;
+      background: transparent; border: none; color: #94a3b8;
+      font-size: 2rem; cursor: pointer; line-height: 1; transition: color .2s;
+    }
+    .lightbox-close:hover { color: #f472b6; }
+    .lightbox-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(99,102,241,.7); border: none; color: #fff;
+      font-size: 1.8rem; width: 48px; height: 48px;
+      border-radius: 50%; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s;
+    }
+    .lightbox-nav:hover { background: #6366f1; }
+    .lightbox-prev { left: 16px; }
+    .lightbox-next { right: 16px; }
+
+    .empty-state { display: none; text-align: center; padding: 60px 20px; color: #334155; }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+    .empty-state p { font-size: 1rem; }
+
+    .counter-badge {
+      display: inline-block; margin-left: 10px;
+      background: #1e1e2e; color: #818cf8;
+      font-size: .8rem; font-weight: 700;
+      padding: 2px 10px; border-radius: 99px; vertical-align: middle;
+    }
+
+    footer {
+      background: #050505; border-top: 1px solid #1e1e2e;
+      text-align: center; padding: 32px 20px;
+      color: #334155; font-size: .85rem;
+    }
+    footer span { color: #6366f1; }
+
+    @media (max-width: 700px) {
+      header h1 { font-size: 2rem; }
+      .featured-grid, .featured-grid.layout-reset { grid-template-columns: 1fr; }
+      .featured-grid .card:first-child,
+      .featured-grid.layout-reset .card:first-child { grid-row: span 1; }
+      .featured-grid .card:first-child img { min-height: 240px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Galería Visual</h1>
+    <p>Explora el mundo a través de imágenes increíbles</p>
+  </header>
+
+  <nav>
+    <button class="active" data-filter="todo">Todo <span class="counter-badge" id="cnt-todo">0</span></button>
+    <button data-filter="naturaleza">Naturaleza <span class="counter-badge" id="cnt-naturaleza">0</span></button>
+    <button data-filter="ciudad">Ciudad <span class="counter-badge" id="cnt-ciudad">0</span></button>
+    <button data-filter="abstracto">Abstracto <span class="counter-badge" id="cnt-abstracto">0</span></button>
+    <button data-filter="personas">Personas <span class="counter-badge" id="cnt-personas">0</span></button>
+  </nav>
+
+  <div class="hero">
+    <img src="https://picsum.photos/id/1018/1600/600" alt="Montañas al amanecer" />
+    <div class="hero-text">
+      <h2>Descubre la Belleza del Mundo</h2>
+      <p>Una colección curada de fotografías impresionantes</p>
+      <div class="hero-badge">Haz clic en cualquier imagen para ampliarla</div>
+    </div>
+  </div>
+
+  <!-- GALERÍA PRINCIPAL -->
+  <div class="section-wrapper" id="wrap-principal">
+    <div class="section">
+      <h2 class="section-title">Colección <span>Principal</span></h2>
+      <p class="section-subtitle">Las fotos más populares de nuestra galería</p>
+      <div class="gallery-grid" id="grid-principal">
+
+        <div class="card" data-category="naturaleza"
+             data-src="https://picsum.photos/id/1015/1200/900" data-title="Río en el Bosque">
+          <img src="https://picsum.photos/id/1015/600/440" alt="Río en el bosque" />
+          <div class="card-info">
+            <h3>Río en el Bosque</h3>
+            <p>Fotografía de naturaleza · 4K</p>
+            <span class="card-tag tag-nature">Naturaleza</span>
+          </div>
+        </div>
+
+        <div class="card" data-category="ciudad"
+             data-src="https://picsum.photos/id/1060/1200/900" data-title="Ciudad de Noche">
+          <img src="https://picsum.photos/id/1060/600/440" alt="Ciudad iluminada" />
+          <div class="card-info">
+            <h3>Ciudad de Noche</h3>
+            <p>Fotografía urbana · HDR</p>
+            <span class="card-tag tag-city">Ciudad</span>
+          </div>
+        </div>
+
+        <div class="card" data-category="abstracto"
+             data-src="https://picsum.photos/id/1074/1200/900" data-title="Colores Abstractos">
+          <img src="https://picsum.photos/id/1074/600/440" alt="Abstracto colorido" />
+          <div class="card-info">
+            <h3>Colores Abstractos</h3>
+            <p>Arte digital · Alta resolución</p>
+            <span class="card-tag tag-abstract">Abstracto</span>
+          </div>
+        </div>
+
+        <div class="card" data-category="personas"
+             data-src="https://picsum.photos/id/1035/1200/900" data-title="Vida Urbana">
+          <img src="https://picsum.photos/id/1035/600/440" alt="Personas en la ciudad" />
+          <div class="card-info">
+            <h3>Vida Urbana</h3>
+            <p>Fotografía callejera · Documental</p>
+            <span class="card-tag tag-people">Personas</span>
+          </div>
+        </div>
+
+        <div class="card" data-category="naturaleza"
+             data-src="https://picsum.photos/id/1039/1200/900" data-title="Lago al Atardecer">
+          <img src="https://picsum.photos/id/1039/600/440" alt="Lago al atardecer" />
+          <div class="card-info">
+            <h3>Lago al Atardecer</h3>
+            <p>Paisaje natural · Panorámica</p>
+            <span class="card-tag tag-nature">Naturaleza</span>
+          </div>
+        </div>
+
+        <div class="card" data-category="ciudad"
+             data-src="https://picsum.photos/id/1047/1200/900" data-title="Arquitectura Moderna">
+          <img src="https://picsum.photos/id/1047/600/440" alt="Arquitectura moderna" />
+          <div class="card-info">
+            <h3>Arquitectura Moderna</h3>
+            <p>Fotografía arquitectónica</p>
+            <span class="card-tag tag-city">Ciudad</span>
+          </div>
+        </div>
+
+        <div class="card" data-category="abstracto"
+             data-src="https://picsum.photos/id/26/1200/900" data-title="Geometría de Luz">
+          <img src="https://picsum.photos/id/26/600/440" alt="Geometría abstracta" />
+          <div class="card-info">
+            <h3>Geometría de Luz</h3>
+            <p>Fotografía experimental · Larga exposición</p>
+            <span class="card-tag tag-abstract">Abstracto</span>
+          </div>
+        </div>
+
+        <div class="card" data-category="personas"
+             data-src="https://picsum.photos/id/177/1200/900" data-title="Retrato Urbano">
+          <img src="https://picsum.photos/id/177/600/440" alt="Retrato en la ciudad" />
+          <div class="card-info">
+            <h3>Retrato Urbano</h3>
+            <p>Fotografía de retrato · Luz natural</p>
+            <span class="card-tag tag-people">Personas</span>
+          </div>
+        </div>
+
+        <div class="card" data-category="naturaleza"
+             data-src="https://picsum.photos/id/1069/1200/900" data-title="Cascada en la Selva">
+          <img src="https://picsum.photos/id/1069/600/440" alt="Cascada" />
+          <div class="card-info">
+            <h3>Cascada en la Selva</h3>
+            <p>Naturaleza tropical · Gran angular</p>
+            <span class="card-tag tag-nature">Naturaleza</span>
+          </div>
+        </div>
+
+        <div class="card" data-category="ciudad"
+             data-src="https://picsum.photos/id/1036/1200/900" data-title="Metro Subterráneo">
+          <img src="https://picsum.photos/id/1036/600/440" alt="Metro subterráneo" />
+          <div class="card-info">
+            <h3>Metro Subterráneo</h3>
+            <p>Fotografía urbana · Larga exposición</p>
+            <span class="card-tag tag-city">Ciudad</span>
+          </div>
+        </div>
+
+        <div class="card" data-category="abstracto"
+             data-src="https://picsum.photos/id/452/1200/900" data-title="Texturas Modernas">
+          <img src="https://picsum.photos/id/452/600/440" alt="Texturas abstractas" />
+          <div class="card-info">
+            <h3>Texturas Modernas</h3>
+            <p>Macro fotografía · Material design</p>
+            <span class="card-tag tag-abstract">Abstracto</span>
+          </div>
+        </div>
+
+        <div class="card" data-category="personas"
+             data-src="https://picsum.photos/id/453/1200/900" data-title="Mercado Tradicional">
+          <img src="https://picsum.photos/id/453/600/440" alt="Mercado" />
+          <div class="card-info">
+            <h3>Mercado Tradicional</h3>
+            <p>Fotografía documental · Cultura</p>
+            <span class="card-tag tag-people">Personas</span>
+          </div>
+        </div>
+
+      </div>
+      <div class="empty-state" id="empty-principal">
+        <div class="icon">🖼️</div>
+        <p>No hay fotos en esta categoría para la colección principal</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DESTACADAS -->
+  <div class="section-wrapper" id="wrap-destacadas">
+    <div class="section" style="padding-top:0;">
+      <h2 class="section-title">Fotos <span>Destacadas</span></h2>
+      <p class="section-subtitle">Selección especial del editor</p>
+      <div class="featured-grid" id="grid-featured">
+
+        <div class="card" data-category="naturaleza"
+             data-src="https://picsum.photos/id/1043/1200/1600" data-title="Bosque de Pinos">
+          <img src="https://picsum.photos/id/1043/800/900" alt="Bosque de pinos" />
+          <div class="card-info">
+            <h3>Bosque de Pinos</h3>
+            <p>Fotografía de naturaleza · Exposición larga</p>
+            <span class="card-tag tag-nature">Naturaleza</span>
+          </div>
+        </div>
+
+        <div class="card" data-category="naturaleza"
+             data-src="https://picsum.photos/id/1048/1200/900" data-title="Cima Nevada">
+          <img src="https://picsum.photos/id/1048/600/440" alt="Montaña nevada" />
+          <div class="card-info">
+            <h3>Cima Nevada</h3>
+            <p>Alta montaña · Invierno</p>
+            <span class="card-tag tag-nature">Naturaleza</span>
+          </div>
+        </div>
+
+        <div class="card" data-category="ciudad"
+             data-src="https://picsum.photos/id/1041/1200/900" data-title="Puente Urbano">
+          <img src="https://picsum.photos/id/1041/600/440" alt="Puente en la ciudad" />
+          <div class="card-info">
+            <h3>Puente Urbano</h3>
+            <p>Fotografía urbana · Larga exposición</p>
+            <span class="card-tag tag-city">Ciudad</span>
+          </div>
+        </div>
+
+      </div>
+      <div class="empty-state" id="empty-destacadas">
+        <div class="icon">⭐</div>
+        <p>No hay fotos destacadas en esta categoría</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANORÁMICAS -->
+  <div class="section-wrapper" id="wrap-panoramas">
+    <div class="section" style="padding-top:0;">
+      <h2 class="section-title">Vistas <span>Panorámicas</span></h2>
+      <p class="section-subtitle">El mundo en formato ancho</p>
+      <div class="panorama-list" id="list-panoramas">
+
+        <div class="panorama-card" data-category="naturaleza"
+             data-src="https://picsum.photos/id/1016/1600/600" data-title="Valle de Montañas">
+          <img src="https://picsum.photos/id/1016/1400/400" alt="Valle de montañas" />
+          <div class="panorama-label">
+            <h3>Valle de Montañas</h3>
+            <p>Fotografía aérea · Europa</p>
+          </div>
+        </div>
+
+        <div class="panorama-card" data-category="naturaleza"
+             data-src="https://picsum.photos/id/1019/1600/600" data-title="Costa Oceánica">
+          <img src="https://picsum.photos/id/1019/1400/400" alt="Costa oceánica" />
+          <div class="panorama-label">
+            <h3>Costa Oceánica</h3>
+            <p>Fotografía marina · Atardecer</p>
+          </div>
+        </div>
+
+        <div class="panorama-card" data-category="ciudad"
+             data-src="https://picsum.photos/id/1033/1600/600" data-title="Horizonte Urbano">
+          <img src="https://picsum.photos/id/1033/1400/400" alt="Horizonte urbano" />
+          <div class="panorama-label">
+            <h3>Horizonte Urbano</h3>
+            <p>Skyline nocturno · Metrópolis</p>
+          </div>
+        </div>
+
+        <div class="panorama-card" data-category="abstracto"
+             data-src="https://picsum.photos/id/547/1600/600" data-title="Horizonte Abstracto">
+          <img src="https://picsum.photos/id/547/1400/400" alt="Abstracto panorámico" />
+          <div class="panorama-label">
+            <h3>Horizonte Abstracto</h3>
+            <p>Arte generativo · Digital</p>
+          </div>
+        </div>
+
+        <div class="panorama-card" data-category="personas"
+             data-src="https://picsum.photos/id/1080/1600/600" data-title="Multitud en la Ciudad">
+          <img src="https://picsum.photos/id/1080/1400/400" alt="Multitud urbana" />
+          <div class="panorama-label">
+            <h3>Multitud en la Ciudad</h3>
+            <p>Fotografía callejera · Rush hour</p>
+          </div>
+        </div>
+
+      </div>
+      <div class="empty-state" id="empty-panoramas">
+        <div class="icon">🌅</div>
+        <p>No hay panorámicas en esta categoría</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Hecho con <span>♥</span> · Galería Visual 2026 · Imágenes vía <span>Picsum Photos</span></p>
+  </footer>
+
+  <!-- LIGHTBOX -->
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lb-close">✕</button>
+    <button class="lightbox-nav lightbox-prev" id="lb-prev">‹</button>
+    <img id="lb-img" src="" alt="" />
+    <div class="lightbox-title" id="lb-title"></div>
+    <button class="lightbox-nav lightbox-next" id="lb-next">›</button>
+  </div>
+
+  <script>
+    let allItems = [];
+    let visibleItems = [];
+    let currentIndex = 0;
+
+    function buildItemList() {
+      allItems = Array.from(document.querySelectorAll('[data-src]'));
+    }
+
+    function updateCounters() {
+      const categories = ['naturaleza', 'ciudad', 'abstracto', 'personas'];
+      const all = document.querySelectorAll('[data-category]');
+      document.getElementById('cnt-todo').textContent = all.length;
+      categories.forEach(cat => {
+        const count = document.querySelectorAll(`[data-category="${cat}"]`).length;
+        const el = document.getElementById(`cnt-${cat}`);
+        if (el) el.textContent = count;
+      });
+    }
+
+    function applyFilter(filter) {
+      const cards     = document.querySelectorAll('.card');
+      const panoramas = document.querySelectorAll('.panorama-card');
+
+      cards.forEach(card => {
+        const match = filter === 'todo' || card.dataset.category === filter;
+        card.style.transition = 'opacity .3s, transform .3s';
+        if (match) {
+          card.style.display = '';
+          requestAnimationFrame(() => {
+            card.style.opacity = '1';
+            card.style.transform = '';
+          });
+        } else {
+          card.style.opacity = '0';
+          card.style.transform = 'scale(0.92)';
+          setTimeout(() => { card.style.display = 'none'; }, 300);
+        }
+      });
+
+      panoramas.forEach(p => {
+        const match = filter === 'todo' || p.dataset.category === filter;
+        p.style.transition = 'opacity .3s';
+        if (match) {
+          p.style.display = '';
+          requestAnimationFrame(() => { p.style.opacity = '1'; });
+        } else {
+          p.style.opacity = '0';
+          setTimeout(() => { p.style.display = 'none'; }, 300);
+        }
+      });
+
+      setTimeout(() => {
+        fixFeaturedLayout(filter);
+        checkEmptyStates(filter);
+        updateVisibleItems(filter);
+      }, 320);
+    }
+
+    function fixFeaturedLayout(filter) {
+      const fg = document.getElementById('grid-featured');
+      if (!fg) return;
+      const visCards = Array.from(fg.querySelectorAll('.card'))
+                            .filter(c => c.style.display !== 'none');
+      fg.classList.remove('layout-reset', 'layout-single');
+      if (visCards.length === 0) return;
+      if (visCards.length === 1) { fg.classList.add('layout-single'); return; }
+      const firstInDom = fg.querySelector('.card');
+      if (firstInDom && firstInDom.style.display === 'none') {
+        fg.classList.add('layout-reset');
+      }
+    }
+
+    function checkEmptyStates(filter) {
+      const sections = [
+        { wrap: 'wrap-principal',  grid: 'grid-principal',  empty: 'empty-principal',  selector: '.card' },
+        { wrap: 'wrap-destacadas', grid: 'grid-featured',   empty: 'empty-destacadas', selector: '.card' },
+        { wrap: 'wrap-panoramas',  grid: 'list-panoramas',  empty: 'empty-panoramas',  selector: '.panorama-card' },
+      ];
+      sections.forEach(s => {
+        const grid  = document.getElementById(s.grid);
+        const empty = document.getElementById(s.empty);
+        if (!grid || !empty) return;
+        const visCount = Array.from(grid.querySelectorAll(s.selector))
+                              .filter(el => el.style.display !== 'none').length;
+        empty.style.display = visCount === 0 ? 'block' : 'none';
+      });
+    }
+
+    function updateVisibleItems(filter) {
+      visibleItems = allItems.filter(el =>
+        (filter === 'todo' || el.dataset.category === filter) &&
+        el.style.display !== 'none'
+      );
+    }
+
+    function openLightbox(el) {
+      currentIndex = visibleItems.indexOf(el);
+      if (currentIndex === -1) currentIndex = 0;
+      showLightboxItem(currentIndex);
+      document.getElementById('lightbox').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function showLightboxItem(idx) {
+      if (!visibleItems.length) return;
+      idx = (idx + visibleItems.length) % visibleItems.length;
+      currentIndex = idx;
+      const el = visibleItems[idx];
+      document.getElementById('lb-img').src = el.dataset.src;
+      document.getElementById('lb-img').alt = el.dataset.title || '';
+      document.getElementById('lb-title').textContent = el.dataset.title || '';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      buildItemList();
+      updateCounters();
+      updateVisibleItems('todo');
+
+      document.querySelectorAll('nav button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          applyFilter(btn.dataset.filter);
+        });
+      });
+
+      document.querySelectorAll('.card, .panorama-card').forEach(el => {
+        el.addEventListener('click', () => openLightbox(el));
+      });
+
+      document.getElementById('lb-close').addEventListener('click', closeLightbox);
+      document.getElementById('lightbox').addEventListener('click', e => {
+        if (e.target === document.getElementById('lightbox')) closeLightbox();
+      });
+      document.getElementById('lb-prev').addEventListener('click', e => {
+        e.stopPropagation(); showLightboxItem(currentIndex - 1);
+      });
+      document.getElementById('lb-next').addEventListener('click', e => {
+        e.stopPropagation(); showLightboxItem(currentIndex + 1);
+      });
+      document.addEventListener('keydown', e => {
+        if (!document.getElementById('lightbox').classList.contains('open')) return;
+        if (e.key === 'Escape')      closeLightbox();
+        if (e.key === 'ArrowLeft')  showLightboxItem(currentIndex - 1);
+        if (e.key === 'ArrowRight') showLightboxItem(currentIndex + 1);
+      });
+    });
+  </script>
+
+</body>
+</html>
